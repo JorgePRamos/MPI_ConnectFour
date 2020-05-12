@@ -1,0 +1,2 @@
+C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\Debug\MPI_ConnectFour.exe
+C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\Debug\MPI_ConnectFour.pdb

@@ -1,0 +1,4 @@
+﻿  board.cpp
+C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\board.cpp(142,8): warning C4101: 'fp': variable local sin referencia
+C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\board.cpp(171,8): warning C4101: 'fp': variable local sin referencia
+  MPI_ConnectFour.vcxproj -> C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\Debug\MPI_ConnectFour.exe
