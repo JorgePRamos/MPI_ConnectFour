@@ -140,13 +140,13 @@ bool Board::Load(const char* fname)
 {
 	dat value;
 	FILE* fp;
-	if ((err = fopen_s(&filepoint,fname, "r")) == NULL)
-		CHECKMSG(0, "Nema datoteke!");
-	if (!(fscanf_s(filepoint, "%d %d", &rows, &cols) != EOF))
+	if ((err = fopen_s(&filepoint,fname, "r")) == NULL)//Open file on filepoint Stream
+		CHECKMSG(0, "##	No file!");
+	if (!(fscanf_s(filepoint, "%d %d", &rows, &cols) != EOF))//read of rows and cols from file stream
 		CHECK(0);
 	Free();
 	Take();
-	// citamo od vrha prema dnu
+	// read from top to bottom
 	for (int r = rows - 1; r >= 0; r--)
 		for (int c = 0; c < cols; c++)
 		{
@@ -155,7 +155,7 @@ bool Board::Load(const char* fname)
 			field[r][c] = value;
 		}
 	fclose(filepoint);
-	// odredi visinu stupaca
+	// determine the height of the columns
 	for (int c = 0; c < cols; c++)
 	{
 		int h = 0;

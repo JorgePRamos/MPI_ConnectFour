@@ -1,11 +1,10 @@
 
-// 4 u nizu - glavni program
 #include<iostream>
 #include<ctime>
 using namespace std;
-#include"board.h"	// razred za igracu plocu
+#include"board.h"	
 
-const int DEPTH = 6;	// default dubina stabla
+const int DEPTH = 6;	//Default depth
 
 double Evaluate(Board Current, dat LastMover, int iLastCol, int iDepth);
 
@@ -14,23 +13,23 @@ int main(int argc, char** argv)
     Board B;
     double dResult, dBest;
     int iBestCol, iDepth = DEPTH;
-    if (argc < 2)
+    if (argc < 2)//No file
     {
-        cout << "Uporaba: <program> <fajl sa trenutnim stanjem> [<dubina>]" << endl;
+        cout << "Usage: <program> <current state file> [<deep>]" << endl;
         return 0;
     }
-    B.Load(argv[1]);
+    B.Load("C:\\Users\\Jorge\\Downloads\\ploca.txt");//File Load
     if (argc > 2)
-        iDepth = atoi(argv[2]);
+        iDepth = atoi(argv[2]);//Geting number of threads
     srand((unsigned)time(NULL));
-    // provjerimo jel igra vec gotova (npr. ako je igrac pobijedio)
+    // check if the game is over (eg if the player has won)
     for (int iCol = 0; iCol < B.Columns(); iCol++)
         if (B.GameEnd(iCol))
         {
             cout << "Igra zavrsena!" << endl;
             return 0;
         }
-    // pretpostavka: na potezu je CPU
+    // assumption: the CPU is on the move
     do
     {
         cout << "Dubina: " << iDepth << endl;
@@ -53,13 +52,13 @@ int main(int argc, char** argv)
             }
         }
         iDepth /= 2;
-        // zasto petlja? ako svi potezi vode u poraz, racunamo jos jednom za duplo manju dubinu
-        // jer igrac mozda nije svjestan mogucnosti pobjede
+        // why loop? if all moves lead to defeat, we count once again for twice the depth
+        // because the player may not be aware of the possibility of winning
     } while (dBest == -1 && iDepth > 0);
     cout << "Najbolji: " << iBestCol << ", vrijednost: " << dBest << endl;
     B.Move(iBestCol, CPU);
-    B.Save(argv[1]);
-    // jesmo li pobijedili
+    // did we win
+
     for (int iCol = 0; iCol < B.Columns(); iCol++)
         if (B.GameEnd(iCol))
         {
@@ -69,11 +68,13 @@ int main(int argc, char** argv)
     return 0;
 }
 
-// rekurzivna funkcija: ispituje sve moguce poteze i vraca ocjenu dobivenog stanja ploce
-// Current: trenutno stanje ploce
-// LastMover: HUMAN ili CPU
-// iLastCol: stupac prethodnog poteza
-// iDepth: dubina se smanjuje do 0
+
+// recursive function: examines all possible moves and returns an estimate of the obtained state of the board
+// Current: current state of the board
+// LastMover: HUMAN or CPU
+// iLastCol: previous move column
+// iDepth: depth is reduced to 0
+
 double Evaluate(Board Current, dat LastMover, int iLastCol, int iDepth)
 {
     double dResult, dTotal;
@@ -120,6 +121,6 @@ double Evaluate(Board Current, dat LastMover, int iLastCol, int iDepth)
         return 1;
     if (bAllLose == true)
         return -1;
-    dTotal /= iMoves;	// dijelimo ocjenu sa brojem mogucih poteza iz zadanog stanja
+    dTotal /= iMoves;	// divide the rating by the number of possible moves from the given state
     return dTotal;
 }
