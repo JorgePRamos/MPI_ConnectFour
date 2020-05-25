@@ -105,9 +105,11 @@ void printboard(int start, int state[ROWS][COLS]) {
 void master(int myRank, int commSize) {
     system("cls");
     system("COLOR 1A");
-    int start = 0;
+    int start = 1;
     int boardMatrix[ROWS][COLS];
     printboard(start, testBoardMatrix);
+    start = 0;
+
 
 
 }

@@ -1,6 +1,5 @@
+//Declarations of Board
 #pragma once
-// Deklaracija razreda Board
-
 #include <assert.h>
 typedef int dat;
 const dat EMPTY = 0;
@@ -15,8 +14,8 @@ private:
 	int rows, cols;
 	dat LastMover;
 	int lastcol;
-	void Take();	// zauzmi i popuni prazninama
-	void Free();
+	void Take();	// Fill gaps
+	void Free();	//Free board
 public:
 	Board() : rows(6), cols(7), LastMover(EMPTY), lastcol(-1)
 	{
@@ -30,16 +29,16 @@ public:
 	{
 		Free();
 	}
-	int Columns()	// broj stupaca
+	int Columns()	// Return number of Colums
 	{
 		return cols;
 	}
 	Board(const Board& src);
 	dat* operator[](const int row);
-	bool MoveLegal(const int col);	// moze li potez u stupcu col
-	bool Move(const int col, const dat player);	// napravi potez
-	bool UndoMove(const int col);	// vrati potez iz stupca
-	bool GameEnd(const int lastcol);	// je li zavrsno stanje
+	bool MoveLegal(const int col);	
+	bool Move(const int col, const dat player);	
+	bool UndoMove(const int col);
+	bool GameEnd(const int lastcol);
 	bool Load(const char* fname);
 	void Save(const char* fname);
 };

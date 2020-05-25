@@ -1,6 +1,4 @@
-
-// Implementacija razreda Board
-
+//Implementation of board
 #include<iostream>
 #include "board.h"
 using namespace std;
@@ -53,7 +51,7 @@ Board::Board(const Board& src)
 		height[i] = src.height[i];
 }
 
-bool Board::MoveLegal(const int col)	// moze li potez u stupcu col
+bool Board::MoveLegal(const int col)	// can move in column col
 {
 	assert(col <= cols);
 	if (field[rows - 1][col] != EMPTY)
@@ -61,7 +59,7 @@ bool Board::MoveLegal(const int col)	// moze li potez u stupcu col
 	return true;
 }
 
-bool Board::Move(const int col, const dat player)	// napravi potez
+bool Board::Move(const int col, const dat player)	// Make a move
 {
 	if (!MoveLegal(col))
 		return false;
@@ -82,7 +80,7 @@ bool Board::UndoMove(const int col)
 	return true;
 }
 
-bool Board::GameEnd(const int lastcol)	// je li zavrsno stanje
+bool Board::GameEnd(const int lastcol)	// is the final state
 {
 	int seq, player, row, col, r, c;
 	assert(lastcol <= cols);
@@ -91,7 +89,7 @@ bool Board::GameEnd(const int lastcol)	// je li zavrsno stanje
 	if (row < 0)
 		return false;
 	player = field[row][col];
-	// uspravno
+	// up
 	seq = 1; r = row - 1;
 	while (r >= 0 && field[r][col] == player)
 	{
@@ -99,7 +97,7 @@ bool Board::GameEnd(const int lastcol)	// je li zavrsno stanje
 	}
 	if (seq > 3)
 		return true;
-	// vodoravno
+	// horizontal
 	seq = 0; c = col;
 	while ((c - 1) >= 0 && field[row][c - 1] == player)
 		c--;
@@ -109,7 +107,7 @@ bool Board::GameEnd(const int lastcol)	// je li zavrsno stanje
 	}
 	if (seq > 3)
 		return true;
-	// koso s lijeva na desno
+	// Diagonal Left to Right
 	seq = 0; r = row; c = col;
 	while ((c - 1) >= 0 && (r - 1) >= 0 && field[r - 1][c - 1] == player)
 	{
@@ -121,7 +119,7 @@ bool Board::GameEnd(const int lastcol)	// je li zavrsno stanje
 	}
 	if (seq > 3)
 		return true;
-	// koso s desna na lijevo
+	// Diagonal Right to Left
 	seq = 0; r = row; c = col;
 	while ((c - 1) >= 0 && (r + 1) < rows && field[r + 1][c - 1] == player)
 	{
