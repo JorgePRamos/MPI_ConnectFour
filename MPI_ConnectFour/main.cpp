@@ -37,12 +37,16 @@ int testBoardMatrix[ROWS][COLS] = {
     {0,0,0,0,0,2,0}
 };
 
-int pivotMatrix[ROWS][COLS];
+int pivotMatrix[ROWS][COLS] = {
+    {0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0}
+};
 
 void boarTranslator(int **input) {
     
-    for (int i = 0; i <= B.rows;i++) {
-        for (int j = 0; j <= B.cols; j++) {
+    for (int i = 0; i < B.rows;i++) {
+        for (int j = 0; j < B.cols; j++) {
             pivotMatrix[i][j] = input[i][j];
         }
     }
@@ -75,7 +79,7 @@ void printboard(int start, int state[ROWS][COLS]) {
             for (a = 0; a < COLS; a++) printf("____");
             printf("\n");
         }
-        for (a = 0; a < COLS; a++)printf("%*d", 4, a + 1);
+        for (a = -1; a < COLS-1; a++)printf("%*d", 4, a + 1);
         printf("\n");
     }
     else {
@@ -100,7 +104,7 @@ void printboard(int start, int state[ROWS][COLS]) {
             for (a = 0; a < COLS; a++) printf("____");
             printf("\n");
         }
-        for (a = 0; a < COLS; a++)printf("%*d", 4, a + 1);
+        for (a = -1; a < COLS-1; a++)printf("%*d", 4, a + 1);
         printf("\n");
 
 
@@ -143,14 +147,15 @@ void master(int myRank, int commSize) {
 
     int start = 1;
     int boardMatrix[ROWS][COLS];
-    printboard(0, testBoardMatrix);
+    printboard(start, boardMatrix);
     start = 0;
     // Players turn
     int playerMove = playerInput();
     B.Move(playerMove,HUMAN);
     printf("\n######################\n");
     printf("\n########### TEST   ###########\n");
-    //printboard(start, B.field);
+    boarTranslator(B.field);
+    printboard(start, pivotMatrix);
 
 }
 
@@ -188,7 +193,7 @@ int main(int argc, char** argv)
 {
     //Inicialization of program
     greeting();
-
+    //B.Free();
     //MPI Inizialization 
     enum role { MASTER, SLAVES };
     int myRank, comm_size;
