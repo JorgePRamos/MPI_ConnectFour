@@ -125,3 +125,60 @@ double Evaluate(Board Current, dat LastMover, int iLastCol, int iDepth)
     dTotal /= iMoves;	// divide the rating by the number of possible moves from the given state
     return dTotal;
 }
+
+
+
+
+
+/*
+
+
+MPI_Init(&argc, &argv);
+
+    int comm_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+    if(comm_size != 2)
+    {
+        printf("This application must be run with 2 MPI processes.\n");
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+
+*/
+
+
+
+/*
+
+
+
+int main(int argc, char** argv) {
+    enum role { MONITOR, PHILOSOPHER};
+    int myRank, comm_size;
+
+    MPI_Init(&argc, &argv);
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+
+    if (signal(SIGINT, sig_handler) == SIG_ERR)
+        printf("********** Error Creating Sig_Handler **********\n");
+
+    switch (myRank)
+    {
+    case MONITOR:
+    {
+        monitor(myRank, comm_size);
+        break;
+    }
+    default:
+    {
+        philosopher(myRank);
+        break;
+    }
+    }
+
+    MPI_Finalize();
+    return 0;
+
+}
+*/
