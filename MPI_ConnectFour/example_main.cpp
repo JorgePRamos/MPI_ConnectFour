@@ -7,7 +7,7 @@ using namespace std;
 const int DEPTH = 6;	//Default depth
 
 double Evaluate(Board Current, dat LastMover, int iLastCol, int iDepth);
-
+/*
 int main(int argc, char** argv)
 {
     Board B;
@@ -67,7 +67,7 @@ int main(int argc, char** argv)
         }
     return 0;
 }
-
+*/
 
 // recursive function: examines all possible moves and returns an estimate of the obtained state of the board
 // Current: current state of the board
@@ -80,7 +80,6 @@ double Evaluate(Board Current, dat LastMover, int iLastCol, int iDepth)
     double dResult, dTotal;
     dat NewMover;
     bool bAllLose = true, bAllWin = true;
-    int iMoves;
     int iMoves;
 
     if (Current.GameEnd(iLastCol))	// igra gotova?

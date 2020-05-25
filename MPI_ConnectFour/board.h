@@ -8,15 +8,15 @@ const dat HUMAN = 2;
 
 class Board
 {
-private:
-	dat** field;
+public:
+	dat** field;//board
 	int* height;
 	int rows, cols;
 	dat LastMover;
 	int lastcol;
 	void Take();	// Fill gaps
 	void Free();	//Free board
-public:
+
 	Board() : rows(6), cols(7), LastMover(EMPTY), lastcol(-1)
 	{
 		Take();
