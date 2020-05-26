@@ -1,5 +1,6 @@
 ﻿  main.cpp
 C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(176,21): warning C4244: '=': conversión de 'float' a 'int'; posible pérdida de datos
-C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(193,25): warning C4244: '=': conversión de 'float' a 'int'; posible pérdida de datos
-C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(215,25): warning C4244: '=': conversión de 'float' a 'int'; posible pérdida de datos
+C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(202,25): warning C4244: '=': conversión de 'float' a 'int'; posible pérdida de datos
+C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(235,20): warning C4477: 'printf' : la cadena de formato '%f' requiere un argumento de tipo 'double', pero el argumento variádico 1 tiene el tipo 'int'
+C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(239,25): warning C4244: '=': conversión de 'float' a 'int'; posible pérdida de datos
   MPI_ConnectFour.vcxproj -> C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\Debug\MPI_ConnectFour.exe

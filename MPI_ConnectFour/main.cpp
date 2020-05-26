@@ -155,7 +155,7 @@ int playerInput() {
 }
 
 void master(int myRank, int commSize) {
-    std::map<float,Node> boards;
+    std::map<float, Node> boards;
     Node node;
     system("cls");
     system("COLOR 1A");
@@ -176,20 +176,29 @@ void master(int myRank, int commSize) {
         node.turn = curerntTurn;
         for (int i = 0; i < B.rows; i++) {
             for (int j = 0; j < B.cols; j++) {
-                 node.boardState[i][j] = printingMatrix[i][j];
-             }
-         }
+                node.boardState[i][j] = printingMatrix[i][j];
+            }
+        }
         boards.insert({ curerntTurn, node });
         // Simulate 7 moves after the player move
-        for (int iCol = 0; iCol < B.Columns(); iCol++)
+        int iCol;
+        int version = 0;
+        for (iCol = 0; iCol < B.Columns(); iCol++)
         {
+            version++;
             // Restore Board
-            B.field = (int**)boards.at(curerntTurn).boardState;
+            //B.field = (int**)boards.at(curerntTurn).boardState;
+            for (int i = 0; i < B.rows; i++) {
+                for (int j = 0; j < B.cols; j++) {
+                    B.field[i][j] = boards.at(curerntTurn).boardState[i][j];
+                }
+            }
             if (B.MoveLegal(iCol))
             {
                 B.Move(iCol, CPU);
             }
-            
+            boarTranslator(B.field);
+            printboard(0, printingMatrix);
             node.turn = curerntTurn;
             node.version = iCol++;
             for (int i = 0; i < B.rows; i++) {
@@ -199,18 +208,33 @@ void master(int myRank, int commSize) {
             }
             //Save on list
             // Will save boards from turn 1 + version of the board generated = 1.1.
-            boards.insert({ curerntTurn+((iCol++)/10), node });
+            boards.insert({ curerntTurn + (((version) / 10)), node });
         }
         // Simulate 7 moves for each of the 7 simulated CPU moves
-        for (int iCol = 0; iCol < B.Columns(); iCol++)
-        {   
+        version = 0;
+        for (iCol = 0; iCol < B.Columns(); iCol++)
+        {
+            version++;
             // Restore Board
             // Will chose boards from turn 1 + version of the board generated = 1.1
-            B.field = (int**)boards.at(curerntTurn+((iCol++) / 10)).boardState;
+            //B.field = (int**)boards.at(curerntTurn + ((iCol++) / 10)).boardState;
+            for (int i = 0; i < B.rows; i++) {
+                for (int j = 0; j < B.cols; j++) {
+                    printf("KEY = %f\n", (curerntTurn + (((version) / 10))));
+                    B.field[i][j] = boards.at(curerntTurn + (((version) / 10))).boardState[i][j];// ## NO esta encontrando el elemento en la lista
+                }
+            }
             if (B.MoveLegal(iCol))
             {
-                B.Move(iCol, CPU);
+                B.Move(iCol, HUMAN);
             }
+
+            boarTranslator(B.field);
+            printboard(0, printingMatrix);
+            printf("Aqui se llega\n");
+            printf("KEY = %f\n", ((((version) / 10))));
+            printf("KEY = %d\n", version);
+
 
             node.turn = curerntTurn;
             node.version = iCol++;
@@ -221,14 +245,15 @@ void master(int myRank, int commSize) {
             }
             // Save on list
            // Will save boards from turn 1 + version of the board generated + sub-Version= 1.1.1
-            boards.insert({ curerntTurn + ((iCol++) / 10 + ((iCol++) / 100)), node });
+            boards.insert({ curerntTurn + ((version) / 10 + ((version) / 100)), node });
         }
-
+        runningFlag = false;
     }
-
-
-
 }
+
+
+
+
 
 // Player Greeting
 void greeting() {
@@ -264,7 +289,7 @@ int main(int argc, char** argv)
 {
     //Inicialization of program
     greeting();
-    //B.Free();
+    Board();
     //MPI Inizialization 
     enum role { MASTER, SLAVES };
     int myRank, comm_size;

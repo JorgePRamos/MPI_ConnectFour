@@ -63,6 +63,7 @@ bool Board::Move(const int col, const dat player)	// Make a move
 {
 	if (!MoveLegal(col))
 		return false;
+		
 	field[height[col]][col] = player;
 	height[col]++;
 	LastMover = player;
