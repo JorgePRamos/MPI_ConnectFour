@@ -29,7 +29,7 @@ const int ROWS = 6;
 const int COLS = 7;
 Board B;
 using namespace std;
-
+boolean flag = true;
 
 int testBoardMatrix[ROWS][COLS] = {
     {0,1,0,0,0,0,0}, // O -> 1
@@ -122,9 +122,7 @@ int playerInput() {
 
         system("COLOR 1A");
         if (incorrect) {
-            system("cls");
             system("COLOR 1A");
-            printf("####################################################################\n                              CONNECT FOUR        \n####################################################################\n");
             printf("\n\t-Sorry MR.Player, That movement is illegal.");
         }
         incorrect = true;
@@ -144,18 +142,23 @@ int playerInput() {
 void master(int myRank, int commSize) {
     system("cls");
     system("COLOR 1A");
-
     int start = 1;
     int boardMatrix[ROWS][COLS];
     printboard(start, boardMatrix);
     start = 0;
-    // Players turn
-    int playerMove = playerInput();
-    B.Move(playerMove,HUMAN);
-    printf("\n######################\n");
-    printf("\n########### TEST   ###########\n");
-    boarTranslator(B.field);
-    printboard(start, pivotMatrix);
+    while (flag) {
+        // Players turn
+        int playerMove = playerInput();
+        B.Move(playerMove, HUMAN);
+        boarTranslator(B.field);
+        printboard(start, pivotMatrix);
+    
+    
+    
+    
+    }
+
+
 
 }
 
