@@ -9,7 +9,7 @@
 #include<math.h>
 #include<windows.h>
 #include<conio.h>
-
+#include<vector>
 char check[4];
 char yes[] = "yes";
 int i = 0, j = 0, k, n, row, col, value, score_x = 0, score_o = 0, game_mode = 0, number, Highscore, connecter = 0, b = 0, select_sides = 0;
@@ -29,7 +29,7 @@ const int ROWS = 6;
 const int COLS = 7;
 Board B;
 using namespace std;
-boolean flag = true;
+boolean runningFlag = true;
 
 int testBoardMatrix[ROWS][COLS] = {
     {0,1,0,0,0,0,0}, // O -> 1
@@ -37,7 +37,7 @@ int testBoardMatrix[ROWS][COLS] = {
     {0,0,0,0,0,2,0}
 };
 
-int pivotMatrix[ROWS][COLS] = {
+int printingMatrix[ROWS][COLS] = {
     {0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0}
@@ -47,11 +47,25 @@ void boarTranslator(int **input) {
     
     for (int i = 0; i < B.rows;i++) {
         for (int j = 0; j < B.cols; j++) {
-            pivotMatrix[i][j] = input[i][j];
+            printingMatrix[i][j] = input[i][j];
         }
     }
 }
 
+// Boards Storage
+struct Node
+{
+    boolean revised = false;
+    int score = 0;
+    int turn = 0;
+    int version = 0;
+    int boardState[ROWS][COLS] = {
+    {0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0}
+    };
+
+};
 
 
 
@@ -140,22 +154,70 @@ int playerInput() {
 }
 
 void master(int myRank, int commSize) {
+    std::vector<Node> boards;
+    Node node;
     system("cls");
     system("COLOR 1A");
     int start = 1;
     int boardMatrix[ROWS][COLS];
     printboard(start, boardMatrix);
     start = 0;
-    while (flag) {
+    int curerntTurn = 0;
+    while (runningFlag) {
+        curerntTurn++;
         // Players turn
         int playerMove = playerInput();
         B.Move(playerMove, HUMAN);
         boarTranslator(B.field);
-        printboard(start, pivotMatrix);
-    
-    
-    
-    
+        printboard(start, printingMatrix);
+        // Computer turn
+        // Save current board
+        node.turn = curerntTurn;
+        for (int i = 0; i < B.rows; i++) {
+            for (int j = 0; j < B.cols; j++) {
+                 node.boardState[i][j] = printingMatrix[i][j];
+             }
+         }
+        boards.push_back(node);//save on list
+        // Simulate 7 moves after the player move
+        for (int iCol = 0; iCol < B.Columns(); iCol++)
+        {
+            // Restore Board
+            B.field = (int**);// ##
+            if (B.MoveLegal(iCol))
+            {
+                B.Move(iCol, CPU);
+            }
+            
+            node.turn = curerntTurn;
+            node.version = iCol++;
+            for (int i = 0; i < B.rows; i++) {
+                for (int j = 0; j < B.cols; j++) {
+                    node.boardState[i][j] = printingMatrix[i][j];
+                }
+            }
+            boards.push_back(node);//save on list
+        }
+        // Simulate 7 moves for each of the 7 simulated CPU moves
+
+        
+        for (int iCol = 0; iCol < B.Columns(); iCol++)
+        {   
+            if (B.MoveLegal(iCol))
+            {
+                B.Move(iCol, CPU);
+            }
+
+            node.turn = curerntTurn;
+            node.version = iCol++;
+            for (int i = 0; i < B.rows; i++) {
+                for (int j = 0; j < B.cols; j++) {
+                    node.boardState[i][j] = printingMatrix[i][j];
+                }
+            }
+            boards.push_back(node);//save on list
+        }
+
     }
 
 
@@ -212,6 +274,7 @@ int main(int argc, char** argv)
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
 
+  
     switch (myRank)
     {
         case MASTER:
