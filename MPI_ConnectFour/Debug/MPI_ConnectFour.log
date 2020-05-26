@@ -1,10 +1,5 @@
-﻿  example_main.cpp
-C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\example_main.cpp(78,8): error C2062: tipo 'double' inesperado
-C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\example_main.cpp(79,1): error C2143: error de sintaxis: falta ';' delante de '{'
-C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\example_main.cpp(79,1): error C2447: '{': falta el encabezado de función (¿lista formal de estilo anterior?)
-  main.cpp
-C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(156,16): error C2143: error de sintaxis: falta ')' delante de ','
-C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(156,16): error C2660: 'Board::Move': la función no acepta 0 argumentos
-C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\board.h(39,7): message : vea la declaración de 'Board::Move'
-C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(156,21): error C2059: error de sintaxis: ')'
-  Generando código...
+﻿  main.cpp
+C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(176,21): warning C4244: '=': conversión de 'float' a 'int'; posible pérdida de datos
+C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(193,25): warning C4244: '=': conversión de 'float' a 'int'; posible pérdida de datos
+C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(215,25): warning C4244: '=': conversión de 'float' a 'int'; posible pérdida de datos
+  MPI_ConnectFour.vcxproj -> C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\Debug\MPI_ConnectFour.exe

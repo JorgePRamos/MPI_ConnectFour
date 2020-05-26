@@ -7,7 +7,7 @@ using namespace std;
 const int DEPTH = 6;	//Default depth
 
 double Evaluate(Board Current, dat LastMover, int iLastCol, int iDepth);
-
+/*
 int main(int argc, char** argv)
 {
     Board B;

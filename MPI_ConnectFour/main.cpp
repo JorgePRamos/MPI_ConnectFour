@@ -10,6 +10,7 @@
 #include<windows.h>
 #include<conio.h>
 #include<vector>
+#include<map>
 char check[4];
 char yes[] = "yes";
 int i = 0, j = 0, k, n, row, col, value, score_x = 0, score_o = 0, game_mode = 0, number, Highscore, connecter = 0, b = 0, select_sides = 0;
@@ -154,7 +155,7 @@ int playerInput() {
 }
 
 void master(int myRank, int commSize) {
-    std::vector<Node> boards;
+    std::map<float,Node> boards;
     Node node;
     system("cls");
     system("COLOR 1A");
@@ -162,7 +163,7 @@ void master(int myRank, int commSize) {
     int boardMatrix[ROWS][COLS];
     printboard(start, boardMatrix);
     start = 0;
-    int curerntTurn = 0;
+    float curerntTurn = 0;
     while (runningFlag) {
         curerntTurn++;
         // Players turn
@@ -178,12 +179,12 @@ void master(int myRank, int commSize) {
                  node.boardState[i][j] = printingMatrix[i][j];
              }
          }
-        boards.push_back(node);//save on list
+        boards.insert({ curerntTurn, node });
         // Simulate 7 moves after the player move
         for (int iCol = 0; iCol < B.Columns(); iCol++)
         {
             // Restore Board
-            B.field = (int**);// ##
+            B.field = (int**)boards.at(curerntTurn).boardState;
             if (B.MoveLegal(iCol))
             {
                 B.Move(iCol, CPU);
@@ -196,13 +197,16 @@ void master(int myRank, int commSize) {
                     node.boardState[i][j] = printingMatrix[i][j];
                 }
             }
-            boards.push_back(node);//save on list
+            //Save on list
+            // Will save boards from turn 1 + version of the board generated = 1.1.
+            boards.insert({ curerntTurn+((iCol++)/10), node });
         }
         // Simulate 7 moves for each of the 7 simulated CPU moves
-
-        
         for (int iCol = 0; iCol < B.Columns(); iCol++)
         {   
+            // Restore Board
+            // Will chose boards from turn 1 + version of the board generated = 1.1
+            B.field = (int**)boards.at(curerntTurn+((iCol++) / 10)).boardState;
             if (B.MoveLegal(iCol))
             {
                 B.Move(iCol, CPU);
@@ -215,7 +219,9 @@ void master(int myRank, int commSize) {
                     node.boardState[i][j] = printingMatrix[i][j];
                 }
             }
-            boards.push_back(node);//save on list
+            // Save on list
+           // Will save boards from turn 1 + version of the board generated + sub-Version= 1.1.1
+            boards.insert({ curerntTurn + ((iCol++) / 10 + ((iCol++) / 100)), node });
         }
 
     }
