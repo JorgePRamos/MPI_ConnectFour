@@ -11,27 +11,15 @@
 #include<conio.h>
 #include<vector>
 #include<map>
-char check[4];
-char yes[] = "yes";
-int i = 0, j = 0, k, n, row, col, value, score_x = 0, score_o = 0, game_mode = 0, number, Highscore, connecter = 0, b = 0, select_sides = 0;
-char board[100][100];
-char read[10];
-char name1[20];
-char name2[20];
-char save[] = "save";
-char sides[] = "replace";
-char red[] = "redo";
-char undo[] = "undo";
-char mains[] = "start";
-int position[100];
-int redo[100];
+
 const int DEPTH = 6;
 const int ROWS = 6;
 const int COLS = 7;
 Board B;
 using namespace std;
 boolean runningFlag = true;
-
+char board[100][100];
+int  row, col;
 
 
 int testBoardMatrix[ROWS][COLS] = {
@@ -66,6 +54,7 @@ struct Node
     {0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0}
     };
+    // Sub boards list for each of the moves
     std::map<int, Node> subBoards;
 
 };
@@ -251,44 +240,47 @@ void master(int myRank, int commSize) {
             }
         }
 
-        /*
+        
         // Simulate 7 moves for each of the 7 simulated CPU moves
-        version = 0;
-        for (iCol = 0; iCol < B.Columns(); iCol++)
-        {
-            version = version + 1;
-            // Restore Board
-            // Will chose boards from turn 1 + version of the board generated = 1.1
-            //B.field = (int**)boards.at(curerntTurn + ((iCol++) / 10)).boardState;
-            for (int i = 0; i < B.rows; i++) {
-                for (int j = 0; j < B.cols; j++) {
-                    printf("KEY = %f\n", (curerntTurn + (((version) / 10))));
-                    B.field[i][j] = boards.at(curerntTurn + (((version) / 10))).boardState[i][j];// ## NO esta encontrando el elemento en la lista
+         // ## Scalable¿?
+
+        for (int x = 1; x <= boards[curerntTurn].subBoards.size(); x++) { // ## < ¿?  <= 
+            version = 1;
+            for (iCol = 0; iCol < B.Columns(); iCol++) {
+    
+                // Restore Board
+                for (int i = 0; i < B.rows; i++) {
+                    for (int j = 0; j < B.cols; j++) {
+                        B.field[i][j] = boards[curerntTurn].subBoards[x].boardState[i][j];
+                    }
                 }
-            }
-            if (B.MoveLegal(iCol))
-            {
-                B.Move(iCol, HUMAN);
-            }
-
-            boarTranslator(B.field);
-            printboard(0, printingMatrix);
-            printf("Aqui se llega\n");
-            printf("KEY = %d\n", iCol);
-            printf("KEY = %d\n", version);
-
-
-            node.turn = curerntTurn;
-            node.version = iCol++;
-            for (int i = 0; i < B.rows; i++) {
-                for (int j = 0; j < B.cols; j++) {
-                    node.boardState[i][j] = printingMatrix[i][j];
+  
+                if (B.MoveLegal(iCol))
+                {
+                    B.Move(iCol, HUMAN);
+                    //Print the new move
+                    boarTranslator(B.field);
+                    printboard(0, printingMatrix); // Curerent boards resieing in printMatrix
+                    printf("## Version = %d\n", version); // ## Debug
+                    // Save on node
+                    node.actor = CPU;
+                    for (int i = 0; i < B.rows; i++) {
+                        for (int j = 0; j < B.cols; j++) {
+                            node.boardState[i][j] = printingMatrix[i][j];
+                        }
+                    }
                 }
+
+
+                // Save on sub list of ---> sub list
+                boards[curerntTurn].subBoards[x].subBoards.insert({version,node});
+                version++;
             }
-            // Save on list
-           // Will save boards from turn 1 + version of the board generated + sub-Version= 1.1.1
-            boards.insert({ curerntTurn + ((version) / 10 + ((version) / 100)), node });
-        }*/
+        }
+        
+
+
+
         printf("## Version = %d\n", version); // ## Debug
         runningFlag = false;
     }

@@ -4,7 +4,7 @@
 using namespace std;
 #include"board.h"	
 
-const int DEPTH = 6;	//Default depth
+const int DEPTH = 4;	//Default depth
 
 double Evaluate(Board Current, dat LastMover, int iLastCol, int iDepth);
 /*
