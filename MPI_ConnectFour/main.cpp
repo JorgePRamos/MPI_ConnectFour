@@ -64,7 +64,7 @@ std::map<int,Node> boards; // Global collection of boards
 //Board printing and Movement printing
 void printboard(int start, int state[ROWS][COLS]) {
 
-    system("cls");
+    //system("cls");
     system("COLOR 1A");
     int a, c;
     //Game just started Start = 1
@@ -90,7 +90,7 @@ void printboard(int start, int state[ROWS][COLS]) {
     }
     else {
 
-        system("cls");             
+        //system("cls");             
         system("COLOR 1A");    
         //Board to Screen-With player moves
         for (row = 0; row < ROWS; row++) {        
@@ -262,6 +262,13 @@ void master(int myRank, int commSize) {
                     boarTranslator(B.field);
                     printboard(0, printingMatrix); // Curerent boards resieing in printMatrix
                     printf("## Version = %d\n", version); // ## Debug
+                    for (int i = 0; i < B.rows; i++) { // ## Debug
+                        for (int j = 0; j < B.cols; j++) {
+                            printf("%d", printingMatrix[i][j]);
+                        }
+                        printf("\n");
+                    }// ## Debug
+                    printf("##################################\n\n"); // ## Debug
                     // Save on node
                     node.actor = CPU;
                     for (int i = 0; i < B.rows; i++) {
@@ -280,7 +287,7 @@ void master(int myRank, int commSize) {
         
 
 
-
+        
         printf("## Version = %d\n", version); // ## Debug
         runningFlag = false;
     }
