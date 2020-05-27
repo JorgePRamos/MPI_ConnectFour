@@ -32,6 +32,8 @@ Board B;
 using namespace std;
 boolean runningFlag = true;
 
+
+
 int testBoardMatrix[ROWS][COLS] = {
     {0,1,0,0,0,0,0}, // O -> 1
     {0,0,0,0,0,0,0}, // X -> 2
@@ -53,22 +55,22 @@ void boarTranslator(int **input) {
     }
 }
 
-// Boards Storage
+// Boards Storage Class
 struct Node
 {
     boolean revised = false;
     int score = 0;
-    int turn = 0;
-    int version = 0;
+    int actor = 0;
     int boardState[ROWS][COLS] = {
     {0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0}
     };
+    std::map<int, Node> subBoards;
 
 };
 
-
+std::map<int,Node> boards; // Global collection of boards
 
 //Board printing and Movement printing
 void printboard(int start, int state[ROWS][COLS]) {
@@ -99,7 +101,7 @@ void printboard(int start, int state[ROWS][COLS]) {
     }
     else {
 
-        system("cls");                          
+        system("cls");             
         system("COLOR 1A");    
         //Board to Screen-With player moves
         for (row = 0; row < ROWS; row++) {        
@@ -154,107 +156,6 @@ int playerInput() {
     return inputColum;
 }
 
-void master(int myRank, int commSize) {
-    std::map<float, Node> boards;
-    Node node;
-    system("cls");
-    system("COLOR 1A");
-    int start = 1;
-    int boardMatrix[ROWS][COLS];
-    printboard(start, boardMatrix);
-    start = 0;
-    float curerntTurn = 0;
-    while (runningFlag) {
-        curerntTurn++;
-        // Players turn
-        int playerMove = playerInput();
-        B.Move(playerMove, HUMAN);
-        boarTranslator(B.field);
-        printboard(start, printingMatrix);
-        // Computer turn
-        // Save current board
-        node.turn = curerntTurn;
-        for (int i = 0; i < B.rows; i++) {
-            for (int j = 0; j < B.cols; j++) {
-                node.boardState[i][j] = printingMatrix[i][j];
-            }
-        }
-        boards.insert({ curerntTurn, node });
-        // Simulate 7 moves after the player move
-        int iCol;
-        int version = 0;
-        for (iCol = 0; iCol < B.Columns(); iCol++)
-        {
-            version++;
-            // Restore Board
-            //B.field = (int**)boards.at(curerntTurn).boardState;
-            for (int i = 0; i < B.rows; i++) {
-                for (int j = 0; j < B.cols; j++) {
-                    B.field[i][j] = boards.at(curerntTurn).boardState[i][j];
-                }
-            }
-            if (B.MoveLegal(iCol))
-            {
-                B.Move(iCol, CPU);
-            }
-            boarTranslator(B.field);
-            printboard(0, printingMatrix);
-            node.turn = curerntTurn;
-            node.version = iCol++;
-            for (int i = 0; i < B.rows; i++) {
-                for (int j = 0; j < B.cols; j++) {
-                    node.boardState[i][j] = printingMatrix[i][j];
-                }
-            }
-            //Save on list
-            // Will save boards from turn 1 + version of the board generated = 1.1.
-            boards.insert({ curerntTurn + (((version) / 10)), node });
-        }
-        // Simulate 7 moves for each of the 7 simulated CPU moves
-        version = 0;
-        for (iCol = 0; iCol < B.Columns(); iCol++)
-        {
-            version++;
-            // Restore Board
-            // Will chose boards from turn 1 + version of the board generated = 1.1
-            //B.field = (int**)boards.at(curerntTurn + ((iCol++) / 10)).boardState;
-            for (int i = 0; i < B.rows; i++) {
-                for (int j = 0; j < B.cols; j++) {
-                    printf("KEY = %f\n", (curerntTurn + (((version) / 10))));
-                    B.field[i][j] = boards.at(curerntTurn + (((version) / 10))).boardState[i][j];// ## NO esta encontrando el elemento en la lista
-                }
-            }
-            if (B.MoveLegal(iCol))
-            {
-                B.Move(iCol, HUMAN);
-            }
-
-            boarTranslator(B.field);
-            printboard(0, printingMatrix);
-            printf("Aqui se llega\n");
-            printf("KEY = %f\n", ((((version) / 10))));
-            printf("KEY = %d\n", version);
-
-
-            node.turn = curerntTurn;
-            node.version = iCol++;
-            for (int i = 0; i < B.rows; i++) {
-                for (int j = 0; j < B.cols; j++) {
-                    node.boardState[i][j] = printingMatrix[i][j];
-                }
-            }
-            // Save on list
-           // Will save boards from turn 1 + version of the board generated + sub-Version= 1.1.1
-            boards.insert({ curerntTurn + ((version) / 10 + ((version) / 100)), node });
-        }
-        runningFlag = false;
-    }
-}
-
-
-
-
-
 // Player Greeting
 void greeting() {
     //Inicialization of program
@@ -284,43 +185,155 @@ void greeting() {
 }
 
 
+void master(int myRank, int commSize) {
 
-int main(int argc, char** argv)
-{
-    //Inicialization of program
-    greeting();
-    Board();
-    //MPI Inizialization 
-    enum role { MASTER, SLAVES };
-    int myRank, comm_size;
-    MPI_Init(&argc, &argv);// ## POSIBLE CHANGE NEEDED FOR ALL PORCESS AVALIBLE
-    MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
-    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+    Node node;
+    system("cls");
+    system("COLOR 1A");
+    // Print empty board
+    int start = 1;
+    int boardMatrix[ROWS][COLS];
+    printboard(start, boardMatrix);
+    start = 0;
 
-    // Check numer of porcess to call
-    //if (comm_size != 2) // ## Testing
-    if (false)
-    {
-        printf("This application must be run with X MPI processes.\n");
-        MPI_Abort(MPI_COMM_WORLD, -1);
+    int curerntTurn = 0;
+    int version = 1;
+    // Main Loop
+    while (runningFlag) {
+
+        curerntTurn++;
+
+        // Players turn
+        int playerMove = playerInput();
+        B.Move(playerMove, HUMAN);
+
+        //Print Updated Board
+        boarTranslator(B.field);
+        printboard(start, printingMatrix);
+
+        // Save current board
+        node.actor = HUMAN;
+        for (int i = 0; i < B.rows; i++) {
+            for (int j = 0; j < B.cols; j++) {
+                node.boardState[i][j] = printingMatrix[i][j];
+            }
+        }
+        boards.insert({ curerntTurn,node });
+
+        // Computer turn
+        // Simulate 7 moves after the player move
+        int iCol;
+       for (iCol = 0; iCol < B.Columns(); iCol++) {
+            // Restore Player Board
+            for (int i = 0; i < B.rows; i++) {
+                for (int j = 0; j < B.cols; j++) {
+                    B.field[i][j] = boards[curerntTurn].boardState[i][j];
+                }
+            }
+            //Chech if move is legal and perform it if so
+            if (B.MoveLegal(iCol))
+            {
+                B.Move(iCol, CPU);
+                //Print the new move
+                boarTranslator(B.field);
+                printboard(0, printingMatrix); // Curerent boards resieing in printMatrix
+                printf("## Version = %d\n", version); // ## Debug
+                // Save on node
+                node.actor = CPU;
+                for (int i = 0; i < B.rows; i++) {
+                    for (int j = 0; j < B.cols; j++) {
+                        node.boardState[i][j] = printingMatrix[i][j];
+                    }
+                }
+                // Save on list
+                boards[curerntTurn].subBoards.insert({ version,node });
+                version++;
+            }
+        }
+
+        /*
+        // Simulate 7 moves for each of the 7 simulated CPU moves
+        version = 0;
+        for (iCol = 0; iCol < B.Columns(); iCol++)
+        {
+            version = version + 1;
+            // Restore Board
+            // Will chose boards from turn 1 + version of the board generated = 1.1
+            //B.field = (int**)boards.at(curerntTurn + ((iCol++) / 10)).boardState;
+            for (int i = 0; i < B.rows; i++) {
+                for (int j = 0; j < B.cols; j++) {
+                    printf("KEY = %f\n", (curerntTurn + (((version) / 10))));
+                    B.field[i][j] = boards.at(curerntTurn + (((version) / 10))).boardState[i][j];// ## NO esta encontrando el elemento en la lista
+                }
+            }
+            if (B.MoveLegal(iCol))
+            {
+                B.Move(iCol, HUMAN);
+            }
+
+            boarTranslator(B.field);
+            printboard(0, printingMatrix);
+            printf("Aqui se llega\n");
+            printf("KEY = %d\n", iCol);
+            printf("KEY = %d\n", version);
+
+
+            node.turn = curerntTurn;
+            node.version = iCol++;
+            for (int i = 0; i < B.rows; i++) {
+                for (int j = 0; j < B.cols; j++) {
+                    node.boardState[i][j] = printingMatrix[i][j];
+                }
+            }
+            // Save on list
+           // Will save boards from turn 1 + version of the board generated + sub-Version= 1.1.1
+            boards.insert({ curerntTurn + ((version) / 10 + ((version) / 100)), node });
+        }*/
+        printf("## Version = %d\n", version); // ## Debug
+        runningFlag = false;
     }
+}
 
-  
-    switch (myRank)
+
+
+
+
+    int main(int argc, char** argv)
     {
+        //Inicialization of program
+        greeting();
+        Board();
+        //MPI Inizialization 
+        enum role { MASTER, SLAVES };
+        int myRank, comm_size;
+        MPI_Init(&argc, &argv);// ## POSIBLE CHANGE NEEDED FOR ALL PORCESS AVALIBLE
+        MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+        MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+
+        // Check numer of porcess to call
+        //if (comm_size != 2) // ## Testing
+        if (false)
+        {
+            printf("This application must be run with X MPI processes.\n");
+            MPI_Abort(MPI_COMM_WORLD, -1);
+        }
+
+
+        switch (myRank)
+        {
         case MASTER:
         {
-        master(myRank, comm_size);
-        break;
+            master(myRank, comm_size);
+            break;
         }
         default:
         {
-        printf("Im in Default\n");
-        break;
+            printf("Im in Default\n");
+            break;
         }
+        }
+
+        MPI_Finalize();
+        return 0;
+
     }
-
-    MPI_Finalize();
-    return 0;
-
-}
