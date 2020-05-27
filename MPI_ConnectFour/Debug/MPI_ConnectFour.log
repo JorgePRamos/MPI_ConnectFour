@@ -1,3 +1,3 @@
 ﻿  main.cpp
-C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(247,27): warning C4018: '<=': no coinciden signed/unsigned
+C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(264,27): warning C4018: '<=': no coinciden signed/unsigned
   MPI_ConnectFour.vcxproj -> C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\Debug\MPI_ConnectFour.exe

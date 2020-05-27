@@ -49,6 +49,8 @@ struct Node
     boolean revised = false;
     int score = 0;
     int actor = 0;
+    int lastCol = 0;
+    int lastHeight[COLS];
     int boardState[ROWS][COLS] = {
     {0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0},
@@ -189,7 +191,7 @@ void master(int myRank, int commSize) {
     int version = 1;
     // Main Loop
     while (runningFlag) {
-
+        int numberBoards = 0; // ##
         curerntTurn++;
 
         // Players turn
@@ -207,6 +209,10 @@ void master(int myRank, int commSize) {
                 node.boardState[i][j] = printingMatrix[i][j];
             }
         }
+        node.lastCol = B.lastcol;
+        for (int u = 0; u < COLS; u++) {
+            node.lastHeight[u] = B.height[u];
+        }
         boards.insert({ curerntTurn,node });
 
         // Computer turn
@@ -219,7 +225,14 @@ void master(int myRank, int commSize) {
                     B.field[i][j] = boards[curerntTurn].boardState[i][j];
                 }
             }
+            B.lastcol = boards[curerntTurn].lastCol;
+            for (int u = 0; u < COLS; u++) {
+                B.height[u] = boards[curerntTurn].lastHeight[u];
+            }
+
+
             //Chech if move is legal and perform it if so
+
             if (B.MoveLegal(iCol))
             {
                 B.Move(iCol, CPU);
@@ -229,6 +242,10 @@ void master(int myRank, int commSize) {
                 printf("## Version = %d\n", version); // ## Debug
                 // Save on node
                 node.actor = CPU;
+                node.lastCol = B.lastcol;
+                for (int u = 0; u < COLS; u++) {
+                    node.lastHeight[u] = B.height[u];
+                }
                 for (int i = 0; i < B.rows; i++) {
                     for (int j = 0; j < B.cols; j++) {
                         node.boardState[i][j] = printingMatrix[i][j];
@@ -247,12 +264,16 @@ void master(int myRank, int commSize) {
         for (int x = 1; x <= boards[curerntTurn].subBoards.size(); x++) { // ## < ¿?  <= 
             version = 1;
             for (iCol = 0; iCol < B.Columns(); iCol++) {
-    
+                numberBoards++;
                 // Restore Board
                 for (int i = 0; i < B.rows; i++) {
                     for (int j = 0; j < B.cols; j++) {
                         B.field[i][j] = boards[curerntTurn].subBoards[x].boardState[i][j];
                     }
+                }
+                B.lastcol = boards[curerntTurn].subBoards[x].lastCol;
+                for (int u = 0; u < COLS; u++) {
+                    B.height[u] = boards[curerntTurn].subBoards[x].lastHeight[u];
                 }
   
                 if (B.MoveLegal(iCol))
@@ -271,6 +292,10 @@ void master(int myRank, int commSize) {
                     printf("##################################\n\n"); // ## Debug
                     // Save on node
                     node.actor = CPU;
+                    node.lastCol = B.lastcol;
+                    for (int u = 0; u < COLS; u++) {
+                        node.lastHeight[u] = B.height[u];
+                    }
                     for (int i = 0; i < B.rows; i++) {
                         for (int j = 0; j < B.cols; j++) {
                             node.boardState[i][j] = printingMatrix[i][j];
@@ -289,6 +314,8 @@ void master(int myRank, int commSize) {
 
         
         printf("## Version = %d\n", version); // ## Debug
+        printf("## Number Boards = %d\n", numberBoards); // ## Debug
+
         runningFlag = false;
     }
 }
