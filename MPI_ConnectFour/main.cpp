@@ -15,7 +15,7 @@
 #define REQUEST 1
 #define RESPONSE 2
 #define TASK_FINISH 3
-const int DEPTH = 6;
+const int DEPTH = 4;
 const int ROWS = 6;
 const int COLS = 7;
 Board B;
@@ -24,9 +24,6 @@ boolean runningMaterFlag = true;
 boolean runningSlaveFlag = false;
 char board[100][100];
 int  row, col;
-
-
-
 
 
 int testBoardMatrix[ROWS][COLS] = {
@@ -51,7 +48,7 @@ void boarTranslator(int **input) {
 }
 
 // Data communication Class
-struct nodePack
+struct NodePack
 {
     int actor = 0;
     int lastCol = 0;
@@ -254,7 +251,28 @@ struct nodePack
     // Master Function
     void master(int myRank, int commSize) {
 
+        // Creation of Struct MPI Data type
+
+       // Number of data items in Struct
+        const int nitems = 4;
+        // {actor, lastCol, lastHeight, boardState}
+        int          blocklengths[nitems] = { 1, 1, COLS, (ROWS * COLS) };
+        MPI_Datatype types[nitems] = { MPI_INT, MPI_INT, MPI_INT, MPI_INT };
+        MPI_Datatype mpi_nodePack;
+
+        MPI_Aint     offsets[nitems];
+        offsets[0] = offsetof(NodePack, actor);
+        offsets[1] = offsetof(NodePack, lastCol);
+        offsets[2] = offsetof(NodePack, lastHeight);
+        offsets[3] = offsetof(NodePack, boardState);
+        // Commit of MPI Data Structure
+        MPI_Type_create_struct(nitems, blocklengths, offsets, types, &mpi_nodePack);
+        MPI_Type_commit(&mpi_nodePack);
         Node node;
+        NodePack bufferNode;
+        int bufferInt;
+        double bufferDouble;
+        MPI_Status stat;
         system("cls");
         system("COLOR 1A");
         // Print empty board
@@ -392,6 +410,20 @@ struct nodePack
             printf("## Version = %d\n", version); // ## Debug
             printf("## Number Boards = %d\n", numberBoards); // ## Debug
 
+
+            /*
+            Necesitamos que esto se repita hasta que no existan más trabajos 49 tablas == 0
+            REcibir request y mandar a esclavo en cocncreto
+            Recibir puntatuaciones y almacenarlas
+            
+            */
+            //Start distributio of jobs
+            MPI_Recv(&bufferInt, 1, MPI_INT, 0, RESPONSE, MPI_COMM_WORLD, &stat);
+            MPI_Send(&bufferNode, 1, mpi_nodePack, 0, REQUEST, MPI_COMM_WORLD);
+
+            // Wait for task
+            MPI_Recv(&bufferDouble, 1, MPI_DOUBLE, 0, RESPONSE, MPI_COMM_WORLD, &stat);
+
             runningMaterFlag = false; // ##
         }
     }
@@ -408,29 +440,38 @@ struct nodePack
         MPI_Datatype mpi_nodePack;
 
         MPI_Aint     offsets[nitems];
-        offsets[0] = offsetof(nodePack, actor);
-        offsets[1] = offsetof(nodePack, lastCol);
-        offsets[2] = offsetof(nodePack, lastHeight);
-        offsets[3] = offsetof(nodePack, boardState);
+        offsets[0] = offsetof(NodePack, actor);
+        offsets[1] = offsetof(NodePack, lastCol);
+        offsets[2] = offsetof(NodePack, lastHeight);
+        offsets[3] = offsetof(NodePack, boardState);
         // Commit of MPI Data Structure
         MPI_Type_create_struct(nitems, blocklengths, offsets, types, &mpi_nodePack);
         MPI_Type_commit(&mpi_nodePack);
 
-        Node bufferNode;
-        int buffer;
+        NodePack bufferNode;
+        int bufferInt;
+        double bufferDouble;
         MPI_Status stat;
 
         // Slave loop
         while (runningSlaveFlag) {
+            Board SlaveBoard;
+            
             // Request task
-            MPI_Send(&buffer, 1, MPI_INT, 0, REQUEST, MPI_COMM_WORLD);
+            MPI_Send(&bufferInt, 1, MPI_INT, 0, REQUEST, MPI_COMM_WORLD);
 
             // Wait for task
             MPI_Recv(&bufferNode, 1, mpi_nodePack, 0, RESPONSE, MPI_COMM_WORLD, &stat);
-            printf("[N_%d] ", myRank);
-
+            printf("[N_%d] \n", myRank);
+            //Pass from Node Matrix to SlaveBoard Field
+            for (int i = 0; i < B.rows; i++) {
+                for (int j = 0; j < B.cols; j++) {
+                    SlaveBoard.field[i][j] = bufferNode.boardState[i][j];
+                }
+            }
+            bufferDouble = Evaluate(SlaveBoard,bufferNode.actor,bufferNode.lastCol,DEPTH);
             // Send final calculation
-            MPI_Send(&buffer, 1, MPI_DOUBLE, 0, TASK_FINISH, MPI_COMM_WORLD);
+            MPI_Send(&bufferDouble, 1, MPI_DOUBLE, 0, TASK_FINISH, MPI_COMM_WORLD);
             printf("[N_%d] ", myRank);
 
         }
@@ -460,7 +501,7 @@ struct nodePack
 
         //Inicialization of program
         //greeting(); // ##
-        Board();
+        
 
 
         // Check numer of porcess to call
@@ -481,6 +522,7 @@ struct nodePack
         }
         default:
         {
+            slave(myRank);
             printf("Im in Default\n");
             break;
         }
