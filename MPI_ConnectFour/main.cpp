@@ -20,7 +20,7 @@ const int ROWS = 6;
 const int COLS = 7;
 Board B;
 using namespace std;
-boolean runningMaterFlag = true;
+boolean runningMainFlag = true;
 boolean runningSlaveFlag = false;
 char board[100][100];
 int  row, col;
@@ -58,13 +58,15 @@ struct NodePack
     {0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0}
     };
+    int key;
+    double score;
 };
 
     // Boards Storage Class
     struct Node
     {
         boolean revised = false;
-        int score = 0;
+        double score = 0;
         int actor = 0;
         int lastCol = 0;
         int lastHeight[COLS];
@@ -73,6 +75,7 @@ struct NodePack
         {0,0,0,0,0,0,0},
         {0,0,0,0,0,0,0}
         };
+        int key;
         // Sub boards list for each of the moves
         std::map<int, Node> subBoards;
 
@@ -254,10 +257,10 @@ struct NodePack
         // Creation of Struct MPI Data type
 
        // Number of data items in Struct
-        const int nitems = 4;
-        // {actor, lastCol, lastHeight, boardState}
-        int          blocklengths[nitems] = { 1, 1, COLS, (ROWS * COLS) };
-        MPI_Datatype types[nitems] = { MPI_INT, MPI_INT, MPI_INT, MPI_INT };
+        const int nitems = 6;
+        // {actor, lastCol, lastHeight, boardStatem, key, score}
+        int          blocklengths[nitems] = { 1, 1, COLS, (ROWS * COLS), 1 , 1};
+        MPI_Datatype types[nitems] = { MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_FLOAT};
         MPI_Datatype mpi_nodePack;
 
         MPI_Aint     offsets[nitems];
@@ -265,14 +268,18 @@ struct NodePack
         offsets[1] = offsetof(NodePack, lastCol);
         offsets[2] = offsetof(NodePack, lastHeight);
         offsets[3] = offsetof(NodePack, boardState);
+        offsets[4] = offsetof(NodePack, key);
+        offsets[4] = offsetof(NodePack, score);
         // Commit of MPI Data Structure
         MPI_Type_create_struct(nitems, blocklengths, offsets, types, &mpi_nodePack);
         MPI_Type_commit(&mpi_nodePack);
+
         Node node;
         NodePack bufferNode;
         int bufferInt;
         double bufferDouble;
         MPI_Status stat;
+        MPI_Request request;
         system("cls");
         system("COLOR 1A");
         // Print empty board
@@ -284,7 +291,7 @@ struct NodePack
         int curerntTurn = 0;
         int version = 1;
         // Main Loop
-        while (runningMaterFlag) {
+        while (runningMainFlag) {
             int numberBoards = 0; // ##
             curerntTurn++;
 
@@ -296,7 +303,7 @@ struct NodePack
             boarTranslator(B.field);
             printboard(start, printingMatrix);
 
-            // Save current board
+            // Save current Turn board 
             node.actor = HUMAN;
             for (int i = 0; i < B.rows; i++) {
                 for (int j = 0; j < B.cols; j++) {
@@ -307,6 +314,7 @@ struct NodePack
             for (int u = 0; u < COLS; u++) {
                 node.lastHeight[u] = B.height[u];
             }
+            node.key = curerntTurn;
             boards.insert({ curerntTurn,node });
 
             // Computer turn
@@ -345,6 +353,7 @@ struct NodePack
                             node.boardState[i][j] = printingMatrix[i][j];
                         }
                     }
+                    node.key = version;
                     // Save on list
                     boards[curerntTurn].subBoards.insert({ version,node });
                     version++;
@@ -353,7 +362,7 @@ struct NodePack
 
 
             // Simulate 7 moves for each of the 7 simulated CPU moves
-             // ## Scalable¿?
+       
 
             for (int x = 1; x <= boards[curerntTurn].subBoards.size(); x++) { // ## < ¿?  <= 
                 version = 1;
@@ -395,6 +404,7 @@ struct NodePack
                                 node.boardState[i][j] = printingMatrix[i][j];
                             }
                         }
+                        node.key = version;
                     }
 
 
@@ -410,21 +420,68 @@ struct NodePack
             printf("## Version = %d\n", version); // ## Debug
             printf("## Number Boards = %d\n", numberBoards); // ## Debug
 
+            int senderRank = 0;
+            // For each of the generated 7 boards from the first turn
+            for (int x = 0; x < boards[curerntTurn].subBoards.size(); x++) {
+                    
+                // For each of the 7 generated sub-boards from each of the 7 suboards
+                for (int j = 0; j < boards[curerntTurn].subBoards[x].subBoards.size(); j++) {
+                    // Start distributio of jobs
+                    // BufferInt == rank
+                    
+                    if (MPI_Irecv(&bufferInt, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &request) == MPI_SUCCESS) {// ##
+                        MPI_Wait(&request, &stat);
+                        printf("[N_%d] Recieve request from [ %d ]\n", myRank, stat.MPI_SOURCE);
+                        // Packcage node for sending
+                        NodePack nodePack;
+                        nodePack.actor = boards[curerntTurn].subBoards[x].subBoards[j].actor;
+                        for (int i = 0; i < B.rows; i++) {
+                            for (int j = 0; j < B.cols; j++) {
+                                nodePack.boardState[i][j] = boards[curerntTurn].subBoards[x].subBoards[j].boardState[i][j];
+                            }
+                        }
+                        nodePack.key = boards[curerntTurn].subBoards[x].subBoards[j].key;
+                        nodePack.lastCol = boards[curerntTurn].subBoards[x].subBoards[j].lastCol;
 
-            /*
-            Necesitamos que esto se repita hasta que no existan más trabajos 49 tablas == 0
-            REcibir request y mandar a esclavo en cocncreto
-            Recibir puntatuaciones y almacenarlas
-            
-            */
-            //Start distributio of jobs
-            MPI_Recv(&bufferInt, 1, MPI_INT, 0, RESPONSE, MPI_COMM_WORLD, &stat);
-            MPI_Send(&bufferNode, 1, mpi_nodePack, 0, REQUEST, MPI_COMM_WORLD);
+                        for (int u = 0; u < COLS; u++) {
+                            nodePack.lastHeight[u] = boards[curerntTurn].subBoards[x].subBoards[j].lastHeight[u];
+                        }
 
-            // Wait for task
-            MPI_Recv(&bufferDouble, 1, MPI_DOUBLE, 0, RESPONSE, MPI_COMM_WORLD, &stat);
+                        bufferNode = nodePack;
+                        MPI_Send(&bufferNode, 1, mpi_nodePack, stat.MPI_SOURCE, RESPONSE, MPI_COMM_WORLD);
+                        printf("[N_%d] Sending Board to [ %d ]\n", myRank, stat.MPI_SOURCE);
+                    }
+                    else if (MPI_Irecv(&bufferNode, 1, mpi_nodePack, MPI_ANY_SOURCE, TASK_FINISH, MPI_COMM_WORLD, &request) == MPI_SUCCESS){
 
-            runningMaterFlag = false; // ##
+                        MPI_Wait(&request, &stat);
+                        printf("[N_%d] Revieve final score for [ %d ]\n", myRank, bufferNode.key);
+                        boards[curerntTurn].subBoards[x].subBoards[bufferNode.key].score = bufferNode.score;
+
+                    }
+                }
+                // Get the max score for each of the 7 sub-boards
+                double maxScore = boards[curerntTurn].subBoards[x].subBoards[1].score;
+                for (int j = 0; j < boards[curerntTurn].subBoards[x].subBoards.size(); j++) {
+                    if (boards[curerntTurn].subBoards[x].subBoards[j].score > maxScore) {
+                        maxScore = boards[curerntTurn].subBoards[x].subBoards[j].score;
+                    }
+                }
+            }
+            // Get the max score for each of the 7 boards
+            double maxScore = boards[curerntTurn].subBoards[1].score;
+            for (int j = 0; j < boards[curerntTurn].subBoards.size(); j++) {
+                if (boards[curerntTurn].subBoards[j].score > maxScore) {
+                    maxScore = boards[curerntTurn].subBoards[j].score;
+                }
+            }
+            // Set the max score for the cpu move in the playing turn
+            boards[curerntTurn].score = maxScore;
+            // Check if game is finish
+            if (B.GameEnd(boards[curerntTurn].lastCol)) {
+                printf("[N_%d] PARTIDA TERMINADA\n", myRank);
+                runningSlaveFlag = false;
+                runningMainFlag = false;
+            }
         }
     }
 
@@ -432,11 +489,11 @@ struct NodePack
     void slave(int myRank) {
         // Creation of Struct MPI Data type
 
-        // Number of data items in Struct
-        const int nitems = 4;
-        // {actor, lastCol, lastHeight, boardState}
-        int          blocklengths[nitems] = { 1, 1, COLS, (ROWS * COLS) };
-        MPI_Datatype types[nitems] = { MPI_INT, MPI_INT, MPI_INT, MPI_INT };
+// Number of data items in Struct
+        const int nitems = 6;
+        // {actor, lastCol, lastHeight, boardStatem, key, score}
+        int          blocklengths[nitems] = { 1, 1, COLS, (ROWS * COLS), 1 , 1 };
+        MPI_Datatype types[nitems] = { MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_FLOAT };
         MPI_Datatype mpi_nodePack;
 
         MPI_Aint     offsets[nitems];
@@ -444,6 +501,8 @@ struct NodePack
         offsets[1] = offsetof(NodePack, lastCol);
         offsets[2] = offsetof(NodePack, lastHeight);
         offsets[3] = offsetof(NodePack, boardState);
+        offsets[4] = offsetof(NodePack, key);
+        offsets[4] = offsetof(NodePack, score);
         // Commit of MPI Data Structure
         MPI_Type_create_struct(nitems, blocklengths, offsets, types, &mpi_nodePack);
         MPI_Type_commit(&mpi_nodePack);
@@ -458,30 +517,28 @@ struct NodePack
             Board SlaveBoard;
             
             // Request task
+            bufferInt = myRank;
             MPI_Send(&bufferInt, 1, MPI_INT, 0, REQUEST, MPI_COMM_WORLD);
-
+            printf("[N_%d] Requesting Board\n", myRank);
             // Wait for task
             MPI_Recv(&bufferNode, 1, mpi_nodePack, 0, RESPONSE, MPI_COMM_WORLD, &stat);
-            printf("[N_%d] \n", myRank);
-            //Pass from Node Matrix to SlaveBoard Field
+            printf("[N_%d] Task recieved\n", myRank);
+
+            // Pass from Node Matrix to SlaveBoard Field
             for (int i = 0; i < B.rows; i++) {
                 for (int j = 0; j < B.cols; j++) {
                     SlaveBoard.field[i][j] = bufferNode.boardState[i][j];
                 }
             }
-            bufferDouble = Evaluate(SlaveBoard,bufferNode.actor,bufferNode.lastCol,DEPTH);
+            // Calcualte Score
+            bufferNode.score = Evaluate(SlaveBoard,bufferNode.actor,bufferNode.lastCol,DEPTH);
+
             // Send final calculation
-            MPI_Send(&bufferDouble, 1, MPI_DOUBLE, 0, TASK_FINISH, MPI_COMM_WORLD);
-            printf("[N_%d] ", myRank);
+            MPI_Send(&bufferNode, 1, mpi_nodePack, 0, TASK_FINISH, MPI_COMM_WORLD);
+            printf("[N_%d] Sending final result\n", myRank);
 
         }
     }
-    /*
-            MPI_Recv(&buffer, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &stat); // Recive next message
-            philosopherRank = stat.MPI_SOURCE; //Read source of message-Rank of philosopher
-            MPI_Send(&buffer, 1, MPI_INT, philosopherRank, RESPONSE, MPI_COMM_WORLD); // Send Fork response to the right philosopher
-
-    */
 
     /*
     mpiexec -n 2 "MPI_ConnectFour.exe"
