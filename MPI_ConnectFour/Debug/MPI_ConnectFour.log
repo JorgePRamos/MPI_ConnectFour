@@ -2,8 +2,8 @@
 C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(366,31): warning C4018: '<=': no coinciden signed/unsigned
 C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(424,31): warning C4018: '<': no coinciden signed/unsigned
 C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(427,35): warning C4018: '<': no coinciden signed/unsigned
-C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(472,35): warning C4018: '<': no coinciden signed/unsigned
-C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(480,31): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(466,35): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(475,31): warning C4018: '<': no coinciden signed/unsigned
 C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(282,16): warning C4101: 'bufferDouble': variable local sin referencia
-C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(520,16): warning C4101: 'bufferDouble': variable local sin referencia
+C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\main.cpp(539,16): warning C4101: 'bufferDouble': variable local sin referencia
   MPI_ConnectFour.vcxproj -> C:\Users\Jorge\Documents\Ingenieria informatica\Code\Visual_Studio\MPI_ConnectFour\MPI_ConnectFour\Debug\MPI_ConnectFour.exe

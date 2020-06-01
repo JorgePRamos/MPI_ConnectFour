@@ -470,14 +470,40 @@ struct NodePack
                 }
             }
             // Get the max score for each of the 7 boards
+            int maxScoreIndex = 1;
             double maxScore = boards[curerntTurn].subBoards[1].score;
             for (int j = 0; j < boards[curerntTurn].subBoards.size(); j++) {
                 if (boards[curerntTurn].subBoards[j].score > maxScore) {
                     maxScore = boards[curerntTurn].subBoards[j].score;
+                    maxScoreIndex = j;
                 }
             }
             // Set the max score for the cpu move in the playing turn
             boards[curerntTurn].score = maxScore;
+
+            // UPdate Boards list Max Score
+            for (int i = 0; i < B.rows; i++) {
+                for (int j = 0; j < B.cols; j++) {
+                    boards[curerntTurn].boardState[i][j] = boards[curerntTurn].subBoards[maxScoreIndex].boardState[i][j];
+                }
+            }
+            // Update playing board
+            for (int i = 0; i < B.rows; i++) {
+                for (int j = 0; j < B.cols; j++) {
+                    B.field[i][j] = boards[curerntTurn].subBoards[maxScoreIndex].boardState[i][j];
+                }
+            }
+            //B.LastMover = boards[curerntTurn].subBoards[maxScoreIndex].actor;
+            B.LastMover = CPU;
+            for (int u = 0; u < COLS; u++) {
+                B.height[u] = boards[curerntTurn].subBoards[maxScoreIndex].lastHeight[u];
+            }
+            B.lastcol = boards[curerntTurn].subBoards[maxScoreIndex].lastCol;
+
+            //Print Updated Board
+            boarTranslator(B.field);
+            printboard(0, printingMatrix);
+
             // Check if game is finish
             if (B.GameEnd(boards[curerntTurn].lastCol)) {
                 printf("[N_%d] PARTIDA TERMINADA\n", myRank);
