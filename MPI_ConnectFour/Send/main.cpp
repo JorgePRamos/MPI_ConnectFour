@@ -11,6 +11,8 @@
 #include<conio.h>
 #include<vector>
 #include<map>
+#include <queue>
+#include <queue>
 
 #define REQUEST 1
 #define RESPONSE 2
@@ -425,36 +427,39 @@ struct NodePack
                 for (int j = 0; j < boards[curerntTurn].subBoards[x].subBoards.size(); j++) {
                     // Start distributio of jobs
                     // BufferInt == rank
-                    
-                    if (MPI_Irecv(&bufferInt, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &request) == MPI_SUCCESS) {// ##
+
+                    // Packcage node for sending
+                    NodePack nodePack;
+                    nodePack.actor = boards[curerntTurn].subBoards[x].subBoards[j].actor;
+                    for (int i = 0; i < B.rows; i++) {
+                        for (int j = 0; j < B.cols; j++) {
+                            nodePack.boardState[i][j] = boards[curerntTurn].subBoards[x].subBoards[j].boardState[i][j];
+                        }
+                    }
+                    nodePack.key = boards[curerntTurn].subBoards[x].subBoards[j].key;
+                    nodePack.lastCol = boards[curerntTurn].subBoards[x].subBoards[j].lastCol;
+
+                    for (int u = 0; u < COLS; u++) {
+                        nodePack.lastHeight[u] = boards[curerntTurn].subBoards[x].subBoards[j].lastHeight[u];
+                    }
+
+
+                    // Communication 
+                    if (MPI_Irecv(&bufferInt, 1, MPI_INT, MPI_ANY_SOURCE, REQUEST, MPI_COMM_WORLD, &request) == MPI_SUCCESS) {// ##
                         MPI_Wait(&request, &stat);
                         printf("[N_%d] Recieve request from [ %d ]\n", myRank, stat.MPI_SOURCE);
-                        // Packcage node for sending
-                        NodePack nodePack;
-                        nodePack.actor = boards[curerntTurn].subBoards[x].subBoards[j].actor;
-                        for (int i = 0; i < B.rows; i++) {
-                            for (int j = 0; j < B.cols; j++) {
-                                nodePack.boardState[i][j] = boards[curerntTurn].subBoards[x].subBoards[j].boardState[i][j];
-                            }
-                        }
-                        nodePack.key = boards[curerntTurn].subBoards[x].subBoards[j].key;
-                        nodePack.lastCol = boards[curerntTurn].subBoards[x].subBoards[j].lastCol;
-
-                        for (int u = 0; u < COLS; u++) {
-                            nodePack.lastHeight[u] = boards[curerntTurn].subBoards[x].subBoards[j].lastHeight[u];
-                        }
 
                         bufferNode = nodePack;
                         MPI_Send(&bufferNode, 1, mpi_nodePack, stat.MPI_SOURCE, RESPONSE, MPI_COMM_WORLD);
                         printf("[N_%d] Sending Board to [ %d ]\n", myRank, stat.MPI_SOURCE);
                     }
-                    else if (MPI_Irecv(&bufferNode, 1, mpi_nodePack, MPI_ANY_SOURCE, TASK_FINISH, MPI_COMM_WORLD, &request) == MPI_SUCCESS){
 
+                    if (MPI_Irecv(&bufferNode, 1, mpi_nodePack, MPI_ANY_SOURCE, TASK_FINISH, MPI_COMM_WORLD, &request) == MPI_SUCCESS){
                         MPI_Wait(&request, &stat);
                         printf("[N_%d] Revieve final score for [ %d ]\n", myRank, bufferNode.key);
                         boards[curerntTurn].subBoards[x].subBoards[bufferNode.key].score = bufferNode.score;
 
-                    }
+                     }
                 }
                 // Get the max score for each of the 7 sub-boards
                 double maxScore = boards[curerntTurn].subBoards[x].subBoards[1].score;
