@@ -96,24 +96,24 @@ struct NodePack
         bool bAllLose = true, bAllWin = true;
         int iMoves;
 
-        if (Current.GameEnd(iLastCol))	// igra gotova?
+        if (Current.GameEnd(iLastCol))	
             if (LastMover == CPU)
-                return 1;	// pobjeda
+                return 1;	
             else //if(LastMover == HUMAN)
-                return -1;	// poraz
-        // nije gotovo, idemo u sljedecu razinu
+                return -1;	
+    
         if (iDepth == 0)
-            return 0;	// a mozda i ne... :)
+            return 0;	
         iDepth--;
-        if (LastMover == CPU)	// tko je na potezu
+        if (LastMover == CPU)	
             NewMover = HUMAN;
         else
             NewMover = CPU;
         dTotal = 0;
-        iMoves = 0;	// broj mogucih poteza u ovoj razini
+        iMoves = 0;	
         for (int iCol = 0; iCol < Current.Columns(); iCol++)
         {
-            if (Current.MoveLegal(iCol))	// jel moze u stupac iCol
+            if (Current.MoveLegal(iCol))	
             {
                 iMoves++;
                 Current.Move(iCol, NewMover);
@@ -125,18 +125,18 @@ struct NodePack
                 if (dResult != 1)
                     bAllWin = false;
                 if (dResult == 1 && NewMover == CPU)
-                    return 1;	// ako svojim potezom mogu doci do pobjede (pravilo 1)
+                    return 1;	
                 if (dResult == -1 && NewMover == HUMAN)
-                    return -1;	// ako protivnik moze potezom doci do pobjede (pravilo 2)
-                //if(dResult > 0)	// izgleda da je bolje ako se u racunanju uzimaju i porazi ...
+                    return -1;	
+              
                 dTotal += dResult;
             }
         }
-        if (bAllWin == true)	// ispitivanje za pravilo 3.
+        if (bAllWin == true)	
             return 1;
         if (bAllLose == true)
             return -1;
-        dTotal /= iMoves;	// divide the rating by the number of possible moves from the given state
+        dTotal /= iMoves;	
         return dTotal;
     }
 
@@ -255,7 +255,7 @@ struct NodePack
 
     // Master Function
     void master(int myRank, int commSize) {
-        greeting(); // ##
+        greeting();
         // Creation of Struct MPI Data type
 
        // Number of data items in Struct
@@ -294,7 +294,7 @@ struct NodePack
         int version = 1;
         // Main Loop
         while (runningMainFlag) {
-            int numberBoards = 0; // ##
+            int numberBoards = 0;
             curerntTurn++;
 
             // Players turn
@@ -339,10 +339,6 @@ struct NodePack
                 if (B.MoveLegal(iCol))
                 {
                     B.Move(iCol, CPU);
-                    //Print the new move
-                    boarTranslator(B.field);
-                    printboard(0, printingMatrix); // Curerent boards resieing in printMatrix
-                    printf("## Version = %d\n", version); // ## Debug
                     // Save on node
                     node.actor = CPU;
                     node.lastCol = B.lastcol;
@@ -363,7 +359,7 @@ struct NodePack
 
 
             // Simulate 7 moves for each of the 7 simulated CPU moves
-            for (int x = 1; x <= boards[curerntTurn].subBoards.size(); x++) { // ## < ¿?  <= 
+            for (int x = 1; x <= boards[curerntTurn].subBoards.size(); x++) { 
                 version = 1;
                 for (iCol = 0; iCol < B.Columns(); iCol++) {
                     numberBoards++;
@@ -382,16 +378,7 @@ struct NodePack
                     {
                         B.Move(iCol, HUMAN);
                         // Print the new move
-                        boarTranslator(B.field);
-                        printboard(0, printingMatrix); // Curerent boards resieing in printMatrix
-                        printf("## Version = %d\n", version); // ## Debug
-                        for (int i = 0; i < B.rows; i++) { // ## Debug
-                            for (int j = 0; j < B.cols; j++) {
-                                printf("%d", printingMatrix[i][j]);
-                            }
-                            printf("\n");
-                        }// ## Debug
-                        printf("##################################\n\n"); // ## Debug
+;
                         // Save on node
                         node.actor = CPU;
                         node.lastCol = B.lastcol;
@@ -416,8 +403,6 @@ struct NodePack
 
 
 
-            printf("## Version = %d\n", version); // ## Debug
-            printf("## Number Boards = %d\n", numberBoards); // ## Debug
 
             int senderRank = 0;
             // For each of the generated 7 boards from the first turn
@@ -445,7 +430,7 @@ struct NodePack
 
 
                     // Communication 
-                    if (MPI_Irecv(&bufferInt, 1, MPI_INT, MPI_ANY_SOURCE, REQUEST, MPI_COMM_WORLD, &request) == MPI_SUCCESS) {// ##
+                    if (MPI_Irecv(&bufferInt, 1, MPI_INT, MPI_ANY_SOURCE, REQUEST, MPI_COMM_WORLD, &request) == MPI_SUCCESS) {
                         MPI_Wait(&request, &stat);
                         printf("[N_%d] Recieve request from [ %d ]\n", myRank, stat.MPI_SOURCE);
 
@@ -481,7 +466,7 @@ struct NodePack
             // Set the max score for the cpu move in the playing turn
             boards[curerntTurn].score = maxScore;
 
-            // UPdate Boards list Max Score
+            // Update Boards list Max Score
             for (int i = 0; i < B.rows; i++) {
                 for (int j = 0; j < B.cols; j++) {
                     boards[curerntTurn].boardState[i][j] = boards[curerntTurn].subBoards[maxScoreIndex].boardState[i][j];
@@ -568,10 +553,6 @@ struct NodePack
         }
     }
 
-    /*
-    mpiexec -n 2 "MPI_ConnectFour.exe"
-
-    */
 
 
     int main(int argc, char** argv)
@@ -584,18 +565,18 @@ struct NodePack
         MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 
         // Check numer of porcess to call
-       /* if (comm_size < 2){ // ## Testing
-        //if (false){
+       if (comm_size < 2){
+
             printf("\n#### This application must be run with at least 2 MPI processes. ####\n\n");
             MPI_Abort(MPI_COMM_WORLD, -1);
-        }*/
+        }
         printf("HEllo");
 
         switch (myRank)
         {
         case MASTER:
         {
-            master(myRank, comm_size); // ##
+            master(myRank, comm_size);
             break;
         }
         default:
@@ -610,3 +591,7 @@ struct NodePack
         return 0;
 
     }
+
+    /*
+    mpiexec -n 2 "MPI_ConnectFour.exe"
+    */
